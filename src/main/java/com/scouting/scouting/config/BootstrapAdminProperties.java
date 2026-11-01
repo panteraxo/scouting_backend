@@ -15,7 +15,6 @@ public class BootstrapAdminProperties {
     private String password;
     private String firstName;
     private String lastName;
-    private String username;
     private DocumentType documentType;
     private String documentNumber;
     private String phone;
@@ -58,14 +57,6 @@ public class BootstrapAdminProperties {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public DocumentType getDocumentType() {

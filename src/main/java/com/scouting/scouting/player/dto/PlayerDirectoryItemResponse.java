@@ -16,6 +16,7 @@ public record PlayerDirectoryItemResponse(
         String lastName,
         Integer age,
         Integer yearsExperience,
+        BigDecimal recordRating,
         String photoUrl,
         PlayerPosition position,
         PositionGroup positionGroup,

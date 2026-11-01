@@ -150,6 +150,7 @@ public class PlayerMapper {
                 profile.getUser().getLastName(),
                 PlayerTime.age(profile.getBirthDate(), PlayerTime.today()),
                 yearsExperience,
+                profile.getRecordRating(),
                 profile.getPhotoUrl(),
                 profile.getPosition(),
                 profile.getPosition() == null ? null : profile.getPosition().group(),

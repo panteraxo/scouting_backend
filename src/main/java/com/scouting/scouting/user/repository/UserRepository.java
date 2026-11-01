@@ -29,13 +29,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
-    boolean existsByUsername(String username);
-
     boolean existsByDocumentNumber(String documentNumber);
 
     boolean existsByEmailAndIdNot(String email, Long id);
-
-    boolean existsByUsernameAndIdNot(String username, Long id);
 
     boolean existsByDocumentNumberAndIdNot(String documentNumber, Long id);
 
@@ -72,7 +68,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
               and (:qPattern is null
                    or lower(u.firstName) like lower(:qPattern) escape '!'
                    or lower(u.lastName) like lower(:qPattern) escape '!'
-                   or lower(u.username) like lower(:qPattern) escape '!'
                    or lower(u.email) like lower(:qPattern) escape '!'
                    or lower(u.documentNumber) like lower(:qPattern) escape '!')
             """)

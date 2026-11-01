@@ -81,11 +81,6 @@ public class BootstrapAdminService {
 
         String firstName = required(properties.getFirstName(), "BOOTSTRAP_ADMIN_FIRST_NAME");
         String lastName = required(properties.getLastName(), "BOOTSTRAP_ADMIN_LAST_NAME");
-        String username = required(properties.getUsername(), "BOOTSTRAP_ADMIN_USERNAME").toLowerCase();
-        if (userRepository.existsByUsername(username)) {
-            log.warn("Bootstrap de administrador omitido: el nombre de usuario configurado ya existe.");
-            return;
-        }
 
         String documentNumber = blankToNull(properties.getDocumentNumber());
         if (documentNumber != null) {
@@ -99,7 +94,6 @@ public class BootstrapAdminService {
         Instant now = Instant.now();
         User admin = new User();
         admin.setEmail(normalizedEmail);
-        admin.setUsername(username);
         admin.setFirstName(firstName.trim());
         admin.setLastName(lastName.trim());
         admin.setPhone(blankToNull(properties.getPhone()));

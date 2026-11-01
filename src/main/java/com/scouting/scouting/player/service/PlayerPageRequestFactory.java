@@ -12,12 +12,15 @@ public final class PlayerPageRequestFactory {
 
     public static final int MAX_PAGE_SIZE = 100;
 
+    private static final String DEFAULT_SORT = "record,desc";
+
     private static final Map<String, String> SORT_PROPERTIES = Map.of(
             "lastName", "user.lastName",
             "firstName", "user.firstName",
             "birthDate", "birthDate",
             "createdAt", "createdAt",
-            "updatedAt", "updatedAt"
+            "updatedAt", "updatedAt",
+            "record", "recordRating"
     );
 
     private PlayerPageRequestFactory() {
@@ -26,7 +29,7 @@ public final class PlayerPageRequestFactory {
     public static Pageable create(int page, int size, String sort) {
         int safePage = Math.max(page, 0);
         int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
-        String requestedSort = sort == null || sort.isBlank() ? "lastName,asc" : sort.trim();
+        String requestedSort = sort == null || sort.isBlank() ? DEFAULT_SORT : sort.trim();
 
         String[] parts = requestedSort.split(",", -1);
         if (parts.length < 1 || parts.length > 2) {
@@ -51,6 +54,15 @@ public final class PlayerPageRequestFactory {
             }
         }
 
-        return PageRequest.of(safePage, safeSize, Sort.by(direction, entityProperty));
+        Sort sorting = Sort.by(direction, entityProperty);
+        if ("record".equals(property)) {
+            // Desempate estable por apellido, nombre e id para la paginacion.
+            sorting = sorting
+                    .and(Sort.by(Sort.Direction.ASC, "user.lastName"))
+                    .and(Sort.by(Sort.Direction.ASC, "user.firstName"))
+                    .and(Sort.by(Sort.Direction.ASC, "id"));
+        }
+
+        return PageRequest.of(safePage, safeSize, sorting);
     }
 }

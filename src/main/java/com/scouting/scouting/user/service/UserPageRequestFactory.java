@@ -13,7 +13,7 @@ public final class UserPageRequestFactory {
     public static final int MAX_PAGE_SIZE = 100;
 
     public static final Set<String> SORT_PROPERTIES = Set.of(
-            "id", "firstName", "lastName", "username", "email", "role", "status",
+            "id", "firstName", "lastName", "email", "role", "status",
             "createdAt", "updatedAt");
 
     private UserPageRequestFactory() {

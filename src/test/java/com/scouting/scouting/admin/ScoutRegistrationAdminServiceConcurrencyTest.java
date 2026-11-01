@@ -109,7 +109,6 @@ class ScoutRegistrationAdminServiceConcurrencyTest {
     private User createPendingScout() {
         User scout = new User();
         scout.setEmail("concurrent@example.com");
-        scout.setUsername("concurrentscout");
         scout.setFirstName("Nombre");
         scout.setLastName("Apellido");
         scout.setDocumentType(DocumentType.DNI);

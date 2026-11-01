@@ -400,6 +400,80 @@ class PlayerApiIntegrationTest {
     }
 
     @Test
+    void directorySortsByRecordRatingByDefaultAndRecalculatesAfterCorrection() throws Exception {
+        User admin = user(Role.ADMIN, UserStatus.ACTIVE, "admin-record@example.com");
+        Academy academy = academy("Academia Record", OperationalStatus.ACTIVE, VerificationStatus.VERIFIED);
+        User best = playerIn(academy, "best-record@example.com");
+        User middle = playerIn(academy, "middle-record@example.com");
+        User withoutRecord = playerIn(academy, "without-record@example.com");
+        // Apellidos elegidos para probar que manda el record y no el orden alfabetico.
+        best.setLastName("Zeta Record");
+        middle.setLastName("M Medio");
+        withoutRecord.setLastName("Aaa Sin Record");
+        userRepository.saveAllAndFlush(java.util.List.of(best, middle, withoutRecord));
+        PlayerProfile bestProfile = createProfile(best, admin, true,
+                PlayerTime.today().minusYears(16), LIMA, PlayerPosition.STRIKER);
+        PlayerProfile middleProfile = createProfile(middle, admin, true,
+                PlayerTime.today().minusYears(17), LIMA, PlayerPosition.CENTER_BACK);
+        PlayerProfile withoutRecordProfile = createProfile(withoutRecord, admin, true,
+                PlayerTime.today().minusYears(18), LIMA, PlayerPosition.GOALKEEPER);
+
+        MockHttpSession session = login(admin.getEmail());
+        Csrf csrf = csrf(session);
+
+        MvcResult first = mockMvc.perform(post("/api/v1/players/" + bestProfile.getId() + "/history")
+                        .session(session).header("X-CSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(ratedHistoryBody(5))))
+                .andExpect(status().isCreated())
+                .andReturn();
+        JsonNode firstJson = objectMapper.readTree(first.getResponse().getContentAsString());
+        long historyId = firstJson.get("id").asLong();
+        long historyVersion = firstJson.get("version").asLong();
+
+        mockMvc.perform(post("/api/v1/players/" + bestProfile.getId() + "/history")
+                        .session(session).header("X-CSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(ratedHistoryBody(3))))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/v1/players/" + middleProfile.getId() + "/history")
+                        .session(session).header("X-CSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(ratedHistoryBody(3))))
+                .andExpect(status().isCreated());
+
+        // Sin parametro sort: promedio descendente y jugadores sin record al final.
+        mockMvc.perform(get("/api/v1/players").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.content[0].id").value(bestProfile.getId()))
+                .andExpect(jsonPath("$.content[0].recordRating").value(4.00))
+                .andExpect(jsonPath("$.content[1].id").value(middleProfile.getId()))
+                .andExpect(jsonPath("$.content[1].recordRating").value(3.00))
+                .andExpect(jsonPath("$.content[2].id").value(withoutRecordProfile.getId()))
+                .andExpect(jsonPath("$.content[2].recordRating").doesNotExist());
+
+        Map<String, Object> correction = ratedHistoryBody(1);
+        correction.put("expectedVersion", historyVersion);
+        correction.put("correctionReason", "Se corrigio la valoracion general.");
+        mockMvc.perform(put("/api/v1/players/" + bestProfile.getId() + "/history/" + historyId)
+                        .session(session).header("X-CSRF-TOKEN", csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(correction)))
+                .andExpect(status().isOk());
+
+        // El promedio pasa a (1 + 3) / 2 y se reordena sin intervencion manual.
+        mockMvc.perform(get("/api/v1/players").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(middleProfile.getId()))
+                .andExpect(jsonPath("$.content[0].recordRating").value(3.00))
+                .andExpect(jsonPath("$.content[1].id").value(bestProfile.getId()))
+                .andExpect(jsonPath("$.content[1].recordRating").value(2.00))
+                .andExpect(jsonPath("$.content[2].id").value(withoutRecordProfile.getId()))
+                .andExpect(jsonPath("$.content[2].recordRating").doesNotExist());
+    }
+
+    @Test
     void historyRejectsResultAndMetricInconsistencies() throws Exception {
         User admin = user(Role.ADMIN, UserStatus.ACTIVE, "admin-validation@example.com");
         Academy academy = academy("Academia Validacion", OperationalStatus.ACTIVE, VerificationStatus.PENDING_VERIFICATION);
@@ -826,6 +900,17 @@ class PlayerApiIntegrationTest {
         return body;
     }
 
+    private Map<String, Object> ratedHistoryBody(int overall) {
+        Map<String, Object> body = historyBody(ActivityType.OFFICIAL_MATCH, "2", "1", "WIN");
+        body.put("ratings", Map.of(
+                "technical", overall,
+                "tactical", overall,
+                "physical", overall,
+                "mental", overall,
+                "overall", overall));
+        return body;
+    }
+
     private Map<String, Object> guardianBody(Long version) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("firstName", "Maria");
@@ -881,7 +966,6 @@ class PlayerApiIntegrationTest {
         int n = sequence.incrementAndGet();
         User user = new User();
         user.setEmail(email.toLowerCase());
-        user.setUsername("user" + n);
         user.setFirstName("Nombre" + n);
         user.setLastName("Apellido" + n);
         user.setDocumentType(DocumentType.DNI);

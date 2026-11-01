@@ -17,7 +17,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  *
  * <p>El rol y el estado se fijan en el servidor ({@code SCOUT} /
  * {@code PENDING_APPROVAL}). El registro no autentica ni crea sesion. Cuando ya
- * existe un correo, documento o usuario, la operacion se considera completada sin
+ * existe un correo o documento, la operacion se considera completada sin
  * persistir y sin revelar el motivo.</p>
  */
 @Service
@@ -43,12 +43,10 @@ public class ScoutRegistrationService {
      */
     public void register(RegisterScoutRequest request) {
         String email = normalizeEmail(request.email());
-        String username = normalizeUsername(request.username());
         String documentNumber = normalizeDocumentNumber(request.documentNumber());
         String phone = normalizePhone(request.phone());
 
         if (userRepository.existsByEmail(email)
-                || userRepository.existsByUsername(username)
                 || userRepository.existsByDocumentNumber(documentNumber)) {
             log.debug("Solicitud de ojeador descartada por duplicado.");
             return;
@@ -56,7 +54,6 @@ public class ScoutRegistrationService {
 
         User user = new User();
         user.setEmail(email);
-        user.setUsername(username);
         user.setFirstName(request.firstName().trim());
         user.setLastName(request.lastName().trim());
         user.setDocumentType(request.documentType());
@@ -77,10 +74,6 @@ public class ScoutRegistrationService {
     }
 
     private String normalizeEmail(String value) {
-        return value.trim().toLowerCase();
-    }
-
-    private String normalizeUsername(String value) {
         return value.trim().toLowerCase();
     }
 

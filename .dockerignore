@@ -1,3 +1,5 @@
+.env
+.env.*
 target/
 src/test/
 .git/

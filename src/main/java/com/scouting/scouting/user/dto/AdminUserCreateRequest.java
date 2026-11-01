@@ -44,10 +44,6 @@ public record AdminUserCreateRequest(
         @Size(max = 150, message = "El correo no debe superar 150 caracteres.")
         String email,
 
-        @NotBlank(message = "El nombre de usuario es obligatorio.")
-        @Pattern(regexp = "^[A-Za-z0-9._-]{3,30}$", message = "El nombre de usuario no es valido.")
-        String username,
-
         @NotNull(message = "El rol es obligatorio.")
         Role role,
 

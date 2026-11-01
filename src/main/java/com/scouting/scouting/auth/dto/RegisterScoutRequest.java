@@ -42,10 +42,6 @@ public record RegisterScoutRequest(
         @Pattern(regexp = "^$|^[0-9+()\\-\\s]{6,20}$", message = "El telefono no es valido.")
         String phone,
 
-        @NotBlank(message = "El nombre de usuario es obligatorio.")
-        @Pattern(regexp = "^[A-Za-z0-9._-]{3,30}$", message = "El nombre de usuario no es valido.")
-        String username,
-
         @NotBlank(message = "La contrasena es obligatoria.")
         @Size(min = 8, max = 72, message = "La contrasena debe tener entre 8 y 72 caracteres.")
         String password

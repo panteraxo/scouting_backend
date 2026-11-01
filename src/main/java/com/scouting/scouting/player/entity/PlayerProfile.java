@@ -89,6 +89,14 @@ public class PlayerProfile {
     @Column(name = "profile_status", nullable = false, length = 20)
     private PlayerProfileStatus profileStatus;
 
+    /**
+     * Promedio de {@code overallRating} de las entradas de historial del
+     * jugador. Es un valor derivado que se recalcula al crear o corregir una
+     * entrada; {@code null} cuando no existen valoraciones.
+     */
+    @Column(name = "record_rating", precision = 4, scale = 2)
+    private BigDecimal recordRating;
+
     @Column(name = "completed_at")
     private Instant completedAt;
 

@@ -41,8 +41,7 @@ public class PlayerAccountService {
                         request.documentType(),
                         request.documentNumber(),
                         request.phone(),
-                        request.email(),
-                        request.username()));
+                        request.email()));
 
         Object player = playerProfileService.create(actor, new PlayerCreateRequest(
                 account.user().id(),

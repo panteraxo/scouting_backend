@@ -30,7 +30,6 @@ import java.time.Instant;
         name = "users",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_users_email", columnNames = "email"),
-                @UniqueConstraint(name = "uk_users_username", columnNames = "username"),
                 @UniqueConstraint(name = "uk_users_document_number", columnNames = "document_number")
         }
 )
@@ -55,9 +54,6 @@ public class User {
 
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
-
-    @Column(name = "username", nullable = false, length = 50)
-    private String username;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "document_type", length = 20)

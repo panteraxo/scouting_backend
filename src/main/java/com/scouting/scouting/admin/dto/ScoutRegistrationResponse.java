@@ -18,7 +18,6 @@ public record ScoutRegistrationResponse(
         String documentNumber,
         String email,
         String phone,
-        String username,
         UserStatus status,
         Instant createdAt
 ) {
@@ -32,7 +31,6 @@ public record ScoutRegistrationResponse(
                 user.getDocumentNumber(),
                 user.getEmail(),
                 user.getPhone(),
-                user.getUsername(),
                 user.getStatus(),
                 user.getCreatedAt()
         );

@@ -37,6 +37,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -119,6 +120,7 @@ public class PlayerHistoryService {
         entry.setLastModifiedBy(operator(actor));
         apply(entry, data);
         PlayerHistoryEntry saved = entryRepository.saveAndFlush(entry);
+        recalculateRecordRating(profile);
         PlayerHistoryEntryResponse response = mapper.toHistory(saved);
         saveRevision(saved, HistoryChangeType.CREATED, null, response);
         return response;
@@ -143,6 +145,7 @@ public class PlayerHistoryService {
         entry.setRevisionNumber(entry.getRevisionNumber() + 1);
         apply(entry, data);
         PlayerHistoryEntry saved = entryRepository.saveAndFlush(entry);
+        recalculateRecordRating(profile);
         PlayerHistoryEntryResponse response = mapper.toHistory(saved);
         saveRevision(saved, HistoryChangeType.CORRECTED, request.correctionReason(), response);
         return response;
@@ -444,6 +447,21 @@ public class PlayerHistoryService {
             return;
         }
         add(target, entry, code, value ? 1 : 0);
+    }
+
+    /**
+     * Recalcula el record deportivo del perfil como el promedio de las
+     * valoraciones generales del historial. El perfil ya esta bloqueado por la
+     * transaccion que crea o corrige la entrada.
+     */
+    private void recalculateRecordRating(PlayerProfile profile) {
+        Double average = entryRepository.findAverageOverallRating(profile.getId());
+        BigDecimal rating = average == null
+                ? null
+                : BigDecimal.valueOf(average).setScale(2, RoundingMode.HALF_UP);
+        // No modificar la entidad gestionada: el record es un derivado y no debe
+        // incrementar la version optimista del perfil.
+        playerProfileRepository.updateRecordRating(profile.getId(), rating);
     }
 
     private void saveRevision(PlayerHistoryEntry entry, HistoryChangeType type, String reason,

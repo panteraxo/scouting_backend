@@ -46,6 +46,17 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+		<!--
+			Cloudflare R2 expone una API compatible con S3. El SDK v2 permite
+			presignar PUT/GET y consultar metadatos con HEAD sin acoplar el
+			dominio a un proveedor concreto. Version fijada para compilaciones
+			reproducibles.
+		-->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.57.6</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.mysql</groupId>

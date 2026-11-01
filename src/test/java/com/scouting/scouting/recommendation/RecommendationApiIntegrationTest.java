@@ -1041,7 +1041,6 @@ class RecommendationApiIntegrationTest {
         int n = sequence.incrementAndGet();
         User user = new User();
         user.setEmail(email.toLowerCase());
-        user.setUsername("user" + n);
         user.setFirstName("Nombre" + n);
         user.setLastName("Apellido" + n);
         user.setDocumentType(DocumentType.DNI);

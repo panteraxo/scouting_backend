@@ -200,10 +200,6 @@ class PlayerAccountApiIntegrationTest {
         Map<String, Object> duplicateEmail = body(existing.getEmail(), academy.getId(), null);
         assertConflictWithoutProfile(session, csrf, duplicateEmail);
 
-        Map<String, Object> duplicateUsername = body("usuario-duplicado@example.com", academy.getId(), null);
-        duplicateUsername.put("username", existing.getUsername());
-        assertConflictWithoutProfile(session, csrf, duplicateUsername);
-
         Map<String, Object> duplicateDocument = body("documento-duplicado@example.com", academy.getId(), null);
         duplicateDocument.put("documentNumber", existing.getDocumentNumber());
         assertConflictWithoutProfile(session, csrf, duplicateDocument);
@@ -287,7 +283,6 @@ class PlayerAccountApiIntegrationTest {
         body.put("documentNumber", "PLY" + n);
         body.put("phone", phone);
         body.put("email", email);
-        body.put("username", "jugador" + n);
         body.put("academyId", academyId);
         body.put("birthDate", PlayerTime.today().minusYears(20).toString());
         body.put("residenceUbigeoCode", LIMA);
@@ -310,7 +305,6 @@ class PlayerAccountApiIntegrationTest {
         body.put("documentNumber", "USR" + n);
         body.put("phone", "999888777");
         body.put("email", email);
-        body.put("username", "usuario" + n);
         body.put("role", role);
         return body;
     }
@@ -319,7 +313,6 @@ class PlayerAccountApiIntegrationTest {
         int n = sequence.incrementAndGet();
         User user = new User();
         user.setEmail(email.toLowerCase());
-        user.setUsername("user" + n);
         user.setFirstName("Nombre" + n);
         user.setLastName("Apellido" + n);
         user.setDocumentType(DocumentType.DNI);

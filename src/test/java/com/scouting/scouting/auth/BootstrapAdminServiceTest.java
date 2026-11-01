@@ -27,8 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "bootstrap.admin.email=root@example.com",
         "bootstrap.admin.password=RootPassword123!",
         "bootstrap.admin.first-name=Root",
-        "bootstrap.admin.last-name=Admin",
-        "bootstrap.admin.username=rootadmin"
+        "bootstrap.admin.last-name=Admin"
 })
 @ActiveProfiles("test")
 class BootstrapAdminServiceTest {

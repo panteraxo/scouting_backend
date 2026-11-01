@@ -37,10 +37,6 @@ public record UserIdentityUpdateRequest(
         @NotBlank(message = "El correo es obligatorio.")
         @Email(message = "El correo no es valido.")
         @Size(max = 150, message = "El correo no debe superar 150 caracteres.")
-        String email,
-
-        @NotBlank(message = "El nombre de usuario es obligatorio.")
-        @Pattern(regexp = "^[A-Za-z0-9._-]{3,30}$", message = "El nombre de usuario no es valido.")
-        String username
+        String email
 ) {
 }

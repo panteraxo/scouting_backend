@@ -14,14 +14,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 
 public interface PlayerProfileRepository extends JpaRepository<PlayerProfile, Long> {
+
+    /**
+     * Actualiza el derivado sin modificar la version del perfil. Se usa desde
+     * una transaccion que ya bloqueo el perfil al crear/corregir historial.
+     */
+    @Modifying(flushAutomatically = true)
+    @Query("update PlayerProfile p set p.recordRating = :rating where p.id = :id")
+    int updateRecordRating(@Param("id") Long id, @Param("rating") BigDecimal rating);
 
     @EntityGraph(attributePaths = "user")
     Optional<PlayerProfile> findByUser_Id(Long userId);

@@ -57,7 +57,7 @@ public class PlayerController {
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "La pagina no puede ser negativa.") int page,
             @RequestParam(defaultValue = "20") @Min(value = 1, message = "El tamano de pagina debe ser al menos 1.")
             @Max(value = 100, message = "El tamano de pagina no debe superar 100.") int size,
-            @RequestParam(defaultValue = "lastName,asc") String sort,
+            @RequestParam(required = false) String sort,
             @RequestParam(required = false) @Size(max = 100, message = "La busqueda no debe superar 100 caracteres.") String q,
             @RequestParam(required = false) PlayerPosition position,
             @RequestParam(required = false) PositionGroup positionGroup,

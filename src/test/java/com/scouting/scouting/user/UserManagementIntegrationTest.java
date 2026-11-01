@@ -458,7 +458,7 @@ class UserManagementIntegrationTest {
     }
 
     @Test
-    void duplicateIdentityAcrossEmailUsernameOrDocumentReturnsGenericConflict() throws Exception {
+    void duplicateIdentityAcrossEmailOrDocumentReturnsGenericConflict() throws Exception {
         User existing = createUser(Role.SCOUT, UserStatus.ACTIVE, "duplicate@example.com");
         User admin = createUser(Role.ADMIN, UserStatus.ACTIVE, "admin-duplicate@example.com");
         MockHttpSession session = login(admin.getEmail());
@@ -468,10 +468,6 @@ class UserManagementIntegrationTest {
 
         Map<String, Object> duplicateEmail = createBody(Role.SCOUT, existing.getEmail());
         messages.add(assertCreateRejected(session, csrf, duplicateEmail, 409, "USER_ALREADY_EXISTS"));
-
-        Map<String, Object> duplicateUsername = createBody(Role.SCOUT, "different-email@example.com");
-        duplicateUsername.put("username", existing.getUsername());
-        messages.add(assertCreateRejected(session, csrf, duplicateUsername, 409, "USER_ALREADY_EXISTS"));
 
         Map<String, Object> duplicateDocument = createBody(Role.SCOUT, "different-doc@example.com");
         duplicateDocument.put("documentNumber", existing.getDocumentNumber());
@@ -857,7 +853,6 @@ class UserManagementIntegrationTest {
         int n = sequence.incrementAndGet();
         User user = new User();
         user.setEmail(email.toLowerCase());
-        user.setUsername("user" + n);
         user.setFirstName("Nombre" + n);
         user.setLastName("Apellido" + n);
         user.setDocumentType(DocumentType.DNI);
@@ -938,7 +933,6 @@ class UserManagementIntegrationTest {
         body.put("documentNumber", "CRT" + n);
         body.put("phone", "999888777");
         body.put("email", email);
-        body.put("username", "created" + n);
         body.put("role", role.name());
         return body;
     }
@@ -951,7 +945,6 @@ class UserManagementIntegrationTest {
         body.put("documentNumber", user.getDocumentNumber());
         body.put("phone", user.getPhone());
         body.put("email", user.getEmail());
-        body.put("username", user.getUsername());
         return body;
     }
 

@@ -84,7 +84,7 @@ class AuthenticationFlowIntegrationTest {
 
         mockMvc.perform(post("/api/v1/auth/register/scout")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(registrationBody("dup@example.com", "dupuser", "11111111"))))
+                        .content(objectMapper.writeValueAsString(registrationBody("dup@example.com", "11111111"))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("CSRF_INVALID"));
     }
@@ -112,7 +112,7 @@ class AuthenticationFlowIntegrationTest {
 
     @Test
     void scoutRegistrationForcesRoleAndStatusAndDoesNotCreateSession() throws Exception {
-        Map<String, Object> body = registrationBody("scout@example.com", "scoutuser", "12345678");
+        Map<String, Object> body = registrationBody("scout@example.com", "12345678");
         body.put("role", "ADMIN");
         body.put("status", "ACTIVE");
         body.put("organizationId", 1);
@@ -141,7 +141,7 @@ class AuthenticationFlowIntegrationTest {
 
     @Test
     void scoutRegistrationWithoutPhoneCreatesPendingApprovalAccount() throws Exception {
-        Map<String, Object> body = registrationBody("nophone@example.com", "nophoneuser", "10000001");
+        Map<String, Object> body = registrationBody("nophone@example.com", "10000001");
         body.remove("phone");
 
         Csrf csrf = obtainCsrf();
@@ -164,7 +164,7 @@ class AuthenticationFlowIntegrationTest {
 
     @Test
     void scoutRegistrationWithValidPhoneStoresIt() throws Exception {
-        Map<String, Object> body = registrationBody("phone@example.com", "phoneuser", "10000002");
+        Map<String, Object> body = registrationBody("phone@example.com", "10000002");
         body.put("phone", "+51 987 654 321");
 
         Csrf csrf = obtainCsrf();
@@ -183,7 +183,7 @@ class AuthenticationFlowIntegrationTest {
 
     @Test
     void scoutRegistrationWithBlankPhoneStoresNull() throws Exception {
-        Map<String, Object> body = registrationBody("blankphone@example.com", "blankphoneuser", "10000003");
+        Map<String, Object> body = registrationBody("blankphone@example.com", "10000003");
         body.put("phone", "");
 
         Csrf csrf = obtainCsrf();
@@ -202,7 +202,7 @@ class AuthenticationFlowIntegrationTest {
 
     @Test
     void scoutRegistrationWithInvalidPhoneReturnsValidationErrorAndDoesNotCreateUser() throws Exception {
-        Map<String, Object> body = registrationBody("invalidphone@example.com", "invalidphoneuser", "10000004");
+        Map<String, Object> body = registrationBody("invalidphone@example.com", "10000004");
         body.put("phone", "abc");
 
         Csrf csrf = obtainCsrf();
@@ -220,21 +220,21 @@ class AuthenticationFlowIntegrationTest {
 
     @Test
     void duplicateScoutRegistrationReturnsSameGenericResponseWithoutRevealingExistence() throws Exception {
-        String firstBody = registerScout("dup@example.com", "dupuser", "87654321");
+        String firstBody = registerScout("dup@example.com", "87654321");
         assertEquals(1, userRepository.count());
 
-        String secondBody = registerScout("dup@example.com", "otrosuser", "99999999");
+        String secondBody = registerScout("dup@example.com", "99999999");
         assertEquals(1, userRepository.count());
         assertEquals(firstBody, secondBody);
 
-        String thirdBody = registerScout("otro@example.com", "dupuser", "55555555");
+        String thirdBody = registerScout("otro@example.com", "87654321");
         assertEquals(1, userRepository.count());
         assertEquals(firstBody, thirdBody);
     }
 
     @Test
     void pendingScoutCannotLogin() throws Exception {
-        registerScout("pending@example.com", "pendinguser", "22222222");
+        registerScout("pending@example.com", "22222222");
         loginExpectingFailure("pending@example.com", "Password123!");
     }
 
@@ -297,8 +297,8 @@ class AuthenticationFlowIntegrationTest {
 
     @Test
     void onlyAdminCanListApproveAndRejectScoutRegistrations() throws Exception {
-        registerScout("approve@example.com", "approveuser", "33333333");
-        registerScout("reject@example.com", "rejectuser", "44444444");
+        registerScout("approve@example.com", "33333333");
+        registerScout("reject@example.com", "44444444");
         createUser(Role.ADMIN, UserStatus.ACTIVE, "boss@example.com", "BossPassword123!", false, null);
 
         MockHttpSession adminSession = login("boss@example.com", "BossPassword123!");
@@ -478,14 +478,14 @@ class AuthenticationFlowIntegrationTest {
         return objectMapper.readTree(result.getResponse().getContentAsString()).get("message").asText();
     }
 
-    private String registerScout(String email, String username, String documentNumber) throws Exception {
+    private String registerScout(String email, String documentNumber) throws Exception {
         Csrf csrf = obtainCsrf();
         MvcResult result = mockMvc.perform(post("/api/v1/auth/register/scout")
                         .session(csrf.session())
                         .header("X-CSRF-TOKEN", csrf.token())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                registrationBody(email, username, documentNumber))))
+                                registrationBody(email, documentNumber))))
                 .andExpect(status().isAccepted())
                 .andReturn();
         return result.getResponse().getContentAsString();
@@ -495,7 +495,6 @@ class AuthenticationFlowIntegrationTest {
                             boolean mustChangePassword, Instant temporaryPasswordExpiresAt) {
         User user = new User();
         user.setEmail(email.toLowerCase());
-        user.setUsername(email.substring(0, email.indexOf('@')).toLowerCase());
         user.setFirstName("Nombre");
         user.setLastName("Apellido");
         user.setDocumentType(DocumentType.DNI);
@@ -509,7 +508,7 @@ class AuthenticationFlowIntegrationTest {
         return userRepository.saveAndFlush(user);
     }
 
-    private Map<String, Object> registrationBody(String email, String username, String documentNumber) {
+    private Map<String, Object> registrationBody(String email, String documentNumber) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("firstName", "Juan");
         body.put("lastName", "Perez");
@@ -517,7 +516,6 @@ class AuthenticationFlowIntegrationTest {
         body.put("documentNumber", documentNumber);
         body.put("email", email);
         body.put("phone", "987654321");
-        body.put("username", username);
         body.put("password", "Password123!");
         return body;
     }

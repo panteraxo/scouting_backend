@@ -1230,7 +1230,6 @@ class OrganizationApiIntegrationTest {
         int n = sequence.incrementAndGet();
         User user = new User();
         user.setEmail(email.toLowerCase());
-        user.setUsername("user" + n);
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setDocumentType(DocumentType.DNI);

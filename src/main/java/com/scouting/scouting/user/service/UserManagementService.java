@@ -138,7 +138,7 @@ public class UserManagementService {
         rejectPlayerOnGeneralCreation(request.role(), false);
 
         IdentityValues identity = identity(request.firstName(), request.lastName(), request.documentType(),
-                request.documentNumber(), request.phone(), request.email(), request.username());
+                request.documentNumber(), request.phone(), request.email());
         validateIdentityAvailable(identity, null);
 
         OrganizationSelection selection = resolveSelection(
@@ -167,7 +167,7 @@ public class UserManagementService {
         Academy academy = lockActiveAcademy(scoped.getId());
 
         IdentityValues identity = identity(request.firstName(), request.lastName(), request.documentType(),
-                request.documentNumber(), request.phone(), request.email(), request.username());
+                request.documentNumber(), request.phone(), request.email());
         validateIdentityAvailable(identity, null);
 
         GeneratedTemporaryPassword temporaryPassword = temporaryPasswordGenerator.generate();
@@ -200,7 +200,7 @@ public class UserManagementService {
         Academy academy = resolvePlayerAcademy(actor, requestedAcademyId);
 
         IdentityValues identity = identity(input.firstName(), input.lastName(), input.documentType(),
-                input.documentNumber(), input.phone(), input.email(), input.username());
+                input.documentNumber(), input.phone(), input.email());
         validateIdentityAvailable(identity, null);
 
         GeneratedTemporaryPassword temporaryPassword = temporaryPasswordGenerator.generate();
@@ -226,7 +226,7 @@ public class UserManagementService {
         rejectPendingMutation(user);
 
         IdentityValues identity = identity(request.firstName(), request.lastName(), request.documentType(),
-                request.documentNumber(), request.phone(), request.email(), request.username());
+                request.documentNumber(), request.phone(), request.email());
         validateIdentityAvailable(identity, id);
         applyIdentity(user, identity);
         return detail(saveExistingUser(user));
@@ -335,7 +335,6 @@ public class UserManagementService {
         user.setDocumentNumber(identity.documentNumber());
         user.setPhone(identity.phone());
         user.setEmail(identity.email());
-        user.setUsername(identity.username());
     }
 
     private User saveNewUser(User user) {
@@ -357,10 +356,8 @@ public class UserManagementService {
     private void validateIdentityAvailable(IdentityValues identity, Long excludeId) {
         boolean duplicate = excludeId == null
                 ? userRepository.existsByEmail(identity.email())
-                    || userRepository.existsByUsername(identity.username())
                     || userRepository.existsByDocumentNumber(identity.documentNumber())
                 : userRepository.existsByEmailAndIdNot(identity.email(), excludeId)
-                    || userRepository.existsByUsernameAndIdNot(identity.username(), excludeId)
                     || userRepository.existsByDocumentNumberAndIdNot(identity.documentNumber(), excludeId);
         if (duplicate) {
             throw duplicateConflict();
@@ -372,15 +369,14 @@ public class UserManagementService {
     }
 
     private IdentityValues identity(String firstName, String lastName, DocumentType documentType,
-                                    String documentNumber, String phone, String email, String username) {
+                                    String documentNumber, String phone, String email) {
         return new IdentityValues(
                 required(firstName, "Los nombres son obligatorios."),
                 required(lastName, "Los apellidos son obligatorios."),
                 documentType,
                 required(documentNumber, "El numero de documento es obligatorio.").toUpperCase(Locale.ROOT),
                 optional(phone),
-                required(email, "El correo es obligatorio.").toLowerCase(Locale.ROOT),
-                required(username, "El nombre de usuario es obligatorio.").toLowerCase(Locale.ROOT)
+                required(email, "El correo es obligatorio.").toLowerCase(Locale.ROOT)
         );
     }
 
@@ -600,8 +596,7 @@ public class UserManagementService {
             DocumentType documentType,
             String documentNumber,
             String phone,
-            String email,
-            String username
+            String email
     ) {
     }
 
@@ -622,8 +617,7 @@ public class UserManagementService {
             DocumentType documentType,
             String documentNumber,
             String phone,
-            String email,
-            String username
+            String email
     ) {
     }
 }

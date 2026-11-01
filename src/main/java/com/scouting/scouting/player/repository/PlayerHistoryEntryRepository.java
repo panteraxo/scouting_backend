@@ -62,6 +62,18 @@ public interface PlayerHistoryEntryRepository extends JpaRepository<PlayerHistor
     @Query("select min(e.activityDate) from PlayerHistoryEntry e where e.playerProfile.id = :profileId")
     LocalDate findFirstActivityDate(@Param("profileId") Long profileId);
 
+    /**
+     * Promedio de las valoraciones generales registradas en el historial
+     * deportivo publico. No incluye evaluaciones privadas de ojeadores.
+     */
+    @Query("""
+            select avg(e.overallRating)
+            from PlayerHistoryEntry e
+            where e.playerProfile.id = :profileId
+              and e.overallRating is not null
+            """)
+    Double findAverageOverallRating(@Param("profileId") Long profileId);
+
     @Query("""
             select e.playerProfile.id as playerId, min(e.activityDate) as firstActivityDate
             from PlayerHistoryEntry e

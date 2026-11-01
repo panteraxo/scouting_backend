@@ -95,11 +95,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register/scout").permitAll()
+                        .requestMatchers("/api/v1/media/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/clubs/me/recommendations",
                                 "/api/v1/clubs/me/recommendations/**").hasRole("CLUB_MANAGER")
                         .requestMatchers("/api/v1/academies/me", "/api/v1/academies/me/**",
                                 "/api/v1/clubs/me", "/api/v1/clubs/me/**").authenticated()
+                        .requestMatchers("/api/v1/media/**").authenticated()
                         .requestMatchers("/api/v1/players/**")
                         .hasAnyRole("ADMIN", "ACADEMY_DIRECTOR", "PROFESSOR", "SCOUT", "PLAYER")
                         .requestMatchers("/api/v1/prospects/**").hasRole("SCOUT")

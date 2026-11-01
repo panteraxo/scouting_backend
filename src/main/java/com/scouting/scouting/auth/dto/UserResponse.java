@@ -13,7 +13,6 @@ public record UserResponse(
         String email,
         String firstName,
         String lastName,
-        String username,
         Role role,
         UserStatus status,
         boolean mustChangePassword
@@ -25,7 +24,6 @@ public record UserResponse(
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getUsername(),
                 user.getRole(),
                 user.getStatus(),
                 user.isMustChangePassword()
